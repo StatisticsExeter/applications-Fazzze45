@@ -34,3 +34,7 @@ def column_mean(df, column_name):
 def lookup_key(d, key):
     """Return the value for a given key in a dictionary."""
     return d.get(key)
+
+def count_occurrences(lst, value):
+    """Return how many times `value` appears in the list `lst`."""
+    return lst.count(value)
