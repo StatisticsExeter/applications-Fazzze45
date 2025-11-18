@@ -20,3 +20,8 @@ def max_value(nums):
 def filter_even(nums):
     """Return only even numbers from the list."""
     return [n for n in nums if n % 2 == 0]
+
+
+def get_fifth_row(df):
+    """Return the fifth row of a dataframe."""
+    return df.iloc[4]
