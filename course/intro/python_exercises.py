@@ -42,3 +42,9 @@ def count_occurrences(lst, value):
 def list_to_string(lst):
     """Convert a list of items into a single space-separated string."""
     return " ".join(str(item) for item in lst)
+
+from datetime import datetime
+
+def parse_date(date_string):
+    """Parse a date string in YYYY-MM-DD format and return a datetime.date object."""
+    return datetime.strptime(date_string, "%Y-%m-%d").date()
