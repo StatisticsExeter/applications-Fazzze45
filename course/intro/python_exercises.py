@@ -30,3 +30,7 @@ def get_fifth_row(df):
 def column_mean(df, column_name):
     """Return the mean of a column in a dataframe."""
     return df[column_name].mean()
+
+def lookup_key(d, key):
+    """Return the value for a given key in a dictionary."""
+    return d.get(key)
