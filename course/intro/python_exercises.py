@@ -14,3 +14,8 @@ def multiply_list(nums):
 def reverse_string(s):
     """Return the reverse of a string."""
     return s[::-1]
+
+
+def max_value(nums):
+    """Return the maximum value in a list of numbers."""
+    return max(nums)
