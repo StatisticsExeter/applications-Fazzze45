@@ -35,13 +35,17 @@ def lookup_key(d, key):
     """Return the value for a given key in a dictionary."""
     return d.get(key)
 
-def count_occurrences(lst, value):
-    """Return how many times `value` appears in the list `lst`."""
-    return lst.count(value)
+def count_occurrences(lst):
+    """Return a dictionary counting occurrences of each element in lst."""
+    result = {}
+    for item in lst:
+        result[item] = result.get(item, 0) + 1
+    return result
 
 def list_to_string(lst):
-    """Convert a list of items into a single space-separated string."""
-    return " ".join(str(item) for item in lst)
+    """Return a comma-separated string from a list of strings."""
+    return ",".join(lst)
+
 
 from datetime import datetime
 
