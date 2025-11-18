@@ -38,3 +38,7 @@ def lookup_key(d, key):
 def count_occurrences(lst, value):
     """Return how many times `value` appears in the list `lst`."""
     return lst.count(value)
+
+def list_to_string(lst):
+    """Convert a list of items into a single space-separated string."""
+    return " ".join(str(item) for item in lst)
