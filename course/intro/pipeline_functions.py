@@ -4,32 +4,25 @@ from scipy.stats import pearsonr
 import statsmodels.api as sm
 import plotly.express as px
 
-
 def plot_scatter(df, x_name, y_name):
-    """Given a dataframe containing numeric columns specified by x_name and y_name
-    return a plotly express scatterplot"""
-    
-
+    """Return a plotly express scatterplot"""
+    return px.scatter(df, x=x_name, y=y_name)
 
 def calculate_correlation(df, x1, x2):
-    """Given a dataframe containing numeric columns specified by x_name and y_name
-    return two objects (numbers), the first is the pearson correlation coefficient, the second 
-    the significance of this estimate"""
-    
-
+    """Return Pearson correlation and p-value"""
+    r, p = pearsonr(df[x1], df[x2])
+    return r, p
 
 def fit_regression(df, x_name, y_name):
-    """Given a dataframe containing numeric columns specified by x_name and y_name
-    return the stats models OLS fit of a regression model of y on x"""
-    
-
+    """Return statsmodels OLS regression model"""
+    X = df[[x_name]]
+    X = sm.add_constant(X)
+    model = sm.OLS(df[y_name], X).fit()
+    return model
 
 def filter_data(df, year):
-    """Given a dataframe of various rows including a column 'Year' and an integer year
-    return a dataframe containing only those rows where the value in this column is less
-    than the value of the supplied year"""
-    
-
+    """Return rows where Year < given year"""
+    return df[df['Year'] < year]
 
 def tyler_viglen():
     """Create the data used at
