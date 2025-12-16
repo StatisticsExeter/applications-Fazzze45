@@ -95,7 +95,7 @@ def task_predict_lda():
         'file_dep': ['data_cache/models/lda_model.joblib', 'data_cache/energy_X_test.csv',
                      'course/supervised_classification/predict.py'],
         'targets': ['data_cache/models/lda_y_pred.csv',
-                    'data_cache/models/lda_y_pred_prob.csv',]
+                    'data_cache/models/lda_y_pred_prob.csv', ]
     }
 
 
@@ -105,7 +105,7 @@ def task_predict_qda():
         'file_dep': ['data_cache/models/qda_model.joblib', 'data_cache/energy_X_test.csv',
                      'course/supervised_classification/predict.py'],
         'targets': ['data_cache/models/qda_y_pred.csv',
-                    'data_cache/models/qda_y_pred_prob.csv',]
+                    'data_cache/models/qda_y_pred_prob.csv', ]
     }
 
 
