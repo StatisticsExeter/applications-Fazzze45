@@ -92,20 +92,27 @@ def _random_effects(results):
 
 def _random_effects(results):
     """
-    Return random effects with required structure for tests.
+    Extract random intercepts and compute confidence intervals.
     """
-    try:
-        re_df = pd.DataFrame(results.random_effects).T
+    re = results.random_effects
 
-        # index must be group labels
-        re_df["group"] = re_df.index
-        re_df.index = re_df["group"]
+    # Build DataFrame
+    re_df = pd.DataFrame.from_dict(re, orient="index")
+    re_df.index.name = "group"
+    re_df = re_df.reset_index()
 
-        # add required CI columns (dummy but required)
-        re_df["lower"] = re_df["Intercept"] - 0.1
-        re_df["upper"] = re_df["Intercept"] + 0.1
+    # Ensure intercept column exists
+    if "Intercept" not in re_df.columns:
+        re_df["Intercept"] = re_df.iloc[:, 1]
 
-        return re_df.reset_index(drop=True)
+    # Standard error from covariance
+    stderr = float(np.sqrt(results.cov_re.iloc[0, 0]))
 
-    except Exception:
-        return pd.DataFrame(columns=["Intercept", "group", "lower", "upper"])
+    # Confidence intervals
+    re_df["lower"] = re_df["Intercept"] - 1.96 * stderr
+    re_df["upper"] = re_df["Intercept"] + 1.96 * stderr
+
+    # Make index match group
+    re_df = re_df.set_index("group")
+
+    return re_df
