@@ -54,36 +54,33 @@ def _fit_model(df):
 
 def _random_effects(results):
     """
-    Extract random effects and compute confidence intervals
-    exactly matching the test expectations.
+    Extract random intercepts and compute confidence intervals.
+    Output must match test contract exactly.
     """
+    re = results.random_effects
 
-    try:
-        re = results.random_effects
-    except ValueError:
-        return pd.DataFrame(
-            columns=["Intercept", "group", "lower", "upper"]
-        )
-
-    # Build DataFrame from random effects
+    # Convert to DataFrame
     re_df = pd.DataFrame.from_dict(re, orient="index")
 
-    # Ensure Intercept column exists
+    # Ensure Intercept exists
     if "Intercept" not in re_df.columns:
         re_df["Intercept"] = re_df.iloc[:, 0]
-
-    # Add group column and set index to match
-    re_df["group"] = re_df.index
-    re_df = re_df.set_index("group")
 
     # Standard error from covariance matrix
     stderr = float(np.sqrt(results.cov_re.iloc[0, 0]))
 
-    # Confidence intervals (must match test formula)
+    # Confidence intervals
     re_df["lower"] = re_df["Intercept"] - 1.96 * stderr
     re_df["upper"] = re_df["Intercept"] + 1.96 * stderr
 
-    return re_df
+    # Add group as a COLUMN (not index)
+    re_df["group"] = re_df.index
+
+    # Reset index to default integer index
+    re_df = re_df.reset_index(drop=True)
+
+    # Return columns in required order
+    return re_df[["Intercept", "group", "lower", "upper"]]
 
 
 def _save_model_summary(results, outpath):
