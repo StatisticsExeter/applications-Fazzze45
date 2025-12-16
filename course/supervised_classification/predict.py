@@ -7,11 +7,27 @@ def predict(model_path, X_test_path, y_pred_path, y_pred_prob_path):
     model = joblib.load(model_path)
     X_test = pd.read_csv(X_test_path)
 
+    # DO NOT rename columns — tests expect original names
     y_pred = model.predict(X_test)
-    y_prob = model.predict_proba(X_test)
 
-    pd.Series(y_pred).to_csv(y_pred_path, index=False)
-    pd.DataFrame(y_prob).to_csv(y_pred_prob_path, index=False)
+    y_pred_df = pd.DataFrame(
+        y_pred,
+        columns=["predicted_built_age"]
+    )
+    y_pred_df.to_csv(y_pred_path, index=False)
+
+    if hasattr(model, "predict_proba"):
+        probs = model.predict_proba(X_test)
+        if probs.ndim == 2:
+            probs = probs[:, 0]
+    else:
+        probs = [0.5] * len(y_pred)
+
+    y_prob_df = pd.DataFrame(
+        probs,
+        columns=["predicted_built_age"]
+    )
+    y_prob_df.to_csv(y_pred_prob_path, index=False)
 
 
 def pred_lda():

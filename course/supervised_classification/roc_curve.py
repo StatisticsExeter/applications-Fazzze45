@@ -1,53 +1,34 @@
-from pathlib import Path
-
-import pandas as pd
 import plotly.graph_objects as go
 from sklearn.metrics import roc_curve as sk_roc_curve, auc
 
-from course.utils import find_project_root
-
-VIGNETTE_DIR = Path("data_cache") / "vignettes" / "supervised_classification"
-
 
 def _plot_roc_curve(y_true, y_prob):
-    """
-    Used by tests.
+    fpr, tpr, _ = sk_roc_curve(y_true, y_prob)
+    roc_auc = auc(fpr, tpr)
 
-    y_true: dict with keys ['fpr', 'tpr', 'roc_auc']
-    y_prob: unused but required by test signature
-    """
     fig = go.Figure()
 
-    # ROC curve
-    fig.add_trace(
-        go.Scatter(
-            x=y_true["fpr"],
-            y=y_true["tpr"],
-            mode="lines",
-            name="ROC Curve",
-        )
-    )
+    fig.add_trace(go.Scatter(
+        x=fpr,
+        y=tpr,
+        mode="lines",
+        name="ROC curve"
+    ))
 
-    # Chance line
-    fig.add_trace(
-        go.Scatter(
-            x=[0, 1],
-            y=[0, 1],
-            mode="lines",
-            name="Chance",
-            line=dict(dash="dash"),
-        )
-    )
+    fig.add_trace(go.Scatter(
+        x=[0, 1],
+        y=[0, 1],
+        mode="lines",
+        name="Random guess",
+        line=dict(dash="dash")
+    ))
 
-    # AUC label (empty trace, just for legend)
-    fig.add_trace(
-        go.Scatter(
-            x=[None],
-            y=[None],
-            mode="markers",
-            name=f"AUC = {y_true['roc_auc']}",
-        )
-    )
+    fig.add_trace(go.Scatter(
+        x=[None],
+        y=[None],
+        mode="lines",
+        name=f"AUC = {roc_auc:.2f}"
+    ))
 
     return fig
 
