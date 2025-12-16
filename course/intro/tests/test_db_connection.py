@@ -5,6 +5,7 @@ from course.utils import load_db_config
 
 pytest.skip("Skipping database connection test — no local PostgreSQL", allow_module_level=True)
 
+
 @pytest.mark.skipif(
     os.getenv("GITHUB_ACTIONS") == "true",
     reason="Skipping database test in GitHub Actions"

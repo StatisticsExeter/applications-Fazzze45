@@ -3,7 +3,7 @@ import numpy as np
 import plotly.graph_objects as go
 from scipy.cluster.hierarchy import linkage
 from course.unsupervised_classification.tree import (
-  _plot_dendrogram, _cutree, _pca, _scatter_clusters)
+    _plot_dendrogram, _cutree, _pca, _scatter_clusters)
 
 
 def test_plot_dendrogram_returns_figure():

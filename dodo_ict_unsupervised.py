@@ -3,8 +3,8 @@ import pandas as pd
 
 
 from course.intro.pipeline_functions import (
-  tyler_viglen, calculate_correlation, filter_data,
-  fit_regression, plot_scatter)
+    tyler_viglen, calculate_correlation, filter_data,
+    fit_regression, plot_scatter)
 
 
 def task_check_cache():
@@ -13,7 +13,7 @@ def task_check_cache():
         models_path = Path("course/intro/cache/")
         models_path.mkdir(parents=True, exist_ok=True)
     return {
-      'actions': [check_cache]
+        'actions': [check_cache]
     }
 
 

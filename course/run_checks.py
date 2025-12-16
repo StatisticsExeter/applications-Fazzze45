@@ -6,12 +6,14 @@ import subprocess
 EXPECTED_ENV = "python-exercises"
 TEST_FILE = "course/intro/tests/test_db_connection.py"
 
+
 def get_active_conda_env():
     """
     Detect the active Conda environment using sys.prefix.
     Works cross-platform without calling conda.
     """
     return os.path.basename(sys.prefix)
+
 
 def run_pytest(test_file):
     """
@@ -33,6 +35,7 @@ def run_pytest(test_file):
         return e.returncode
     return 0
 
+
 def main():
     active_env = get_active_conda_env()
     if active_env == EXPECTED_ENV:
@@ -46,6 +49,7 @@ def main():
     print("Checking database connection via tests...")
     exit_code = run_pytest(TEST_FILE)
     sys.exit(exit_code)
+
 
 if __name__ == "__main__":
     main()

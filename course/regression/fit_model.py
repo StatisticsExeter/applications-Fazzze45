@@ -1,3 +1,8 @@
+from course.utils import find_project_root
+from pathlib import Path
+import statsmodels.formula.api as smf
+import numpy as np
+import pandas as pd
 import warnings
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 
@@ -6,11 +11,6 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
-import pandas as pd
-import numpy as np
-import statsmodels.formula.api as smf
-from pathlib import Path
-from course.utils import find_project_root
 
 VIGNETTE_DIR = Path("data_cache") / "vignettes" / "regression"
 
@@ -90,28 +90,23 @@ def _random_effects(results):
     return pd.DataFrame(rows)
 
 
-def fit_model():
+def _random_effects(results):
     """
-    Pipeline entry point.
-    Fits the model, saves summary, and exports random effects if available.
+    Return random effects with confidence intervals.
     """
+    try:
+        re = results.random_effects
+    except ValueError:
+        return pd.DataFrame()
 
-    base_dir = find_project_root()
+    rows = []
+    for group, values in re.items():
+        intercept = values.iloc[0] if hasattr(values, "iloc") else values[0]
+        rows.append({
+            "group": group,
+            "Intercept": intercept,
+            "lower": intercept - 1.96 * results.bse.iloc[0],
+            "upper": intercept + 1.96 * results.bse.iloc[0],
+        })
 
-    # Load regression dataset
-    df = pd.read_csv(base_dir / "data_cache" / "la_energy.csv")
-
-    # Fit model
-    results = _fit_model(df)
-
-    # Save model summary
-    summary_path = VIGNETTE_DIR / "model_fit.txt"
-    _save_model_summary(results, summary_path)
-
-    # Save random effects (may be empty)
-    re_df = _random_effects(results)
-    re_path = base_dir / "data_cache" / "models" / "reffs.csv"
-    re_path.parent.mkdir(parents=True, exist_ok=True)
-    re_df.to_csv(re_path, index=False)
-
-    return True
+    return pd.DataFrame(rows)

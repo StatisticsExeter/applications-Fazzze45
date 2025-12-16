@@ -2,8 +2,8 @@ import pytest
 import pandas as pd
 from numpy import nan
 from ..python_exercises import (
-  sum_list, max_value, reverse_string, filter_even, get_fifth_row, column_mean,
-  lookup_key, count_occurrences, drop_missing, value_counts_df)
+    sum_list, max_value, reverse_string, filter_even, get_fifth_row, column_mean,
+    lookup_key, count_occurrences, drop_missing, value_counts_df)
 
 
 def test_sum_list_basic():

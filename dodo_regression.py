@@ -12,7 +12,7 @@ def task_check_cache_data():
         models_path = Path("data_cache/models")
         models_path.mkdir(parents=True, exist_ok=True)
     return {
-      'actions': [check_cache_data]
+        'actions': [check_cache_data]
     }
 
 
@@ -22,7 +22,7 @@ def task_check_cache_results():
         models_path = Path("data_cache/vignettes/regression")
         models_path.mkdir(parents=True, exist_ok=True)
     return {
-      'actions': [check_cache_results]
+        'actions': [check_cache_results]
     }
 
 

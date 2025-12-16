@@ -1,56 +1,21 @@
 import pandas as pd
 import plotly.graph_objects as go
-from pathlib import Path
-from course.utils import find_project_root
-
-VIGNETTE_DIR = Path("data_cache") / "vignettes" / "supervised_classification"
+from sklearn.metrics import roc_curve, auc
 
 
-def _plot_roc_curve(y_true_path, y_prob_path, outpath, title):
-    """
-    Plot ROC curve using Plotly (CI-safe).
-    Returns a Plotly Figure (required by tests).
-    """
-    y_true = pd.read_csv(y_true_path).iloc[:, 0]
-    y_prob = pd.read_csv(y_prob_path).iloc[:, 0]
-
-    # Binary encoding for ROC
-    positive_class = y_true.unique()[0]
-    y_true_binary = (y_true == positive_class).astype(int)
-
-    # Sort for a valid ROC-like curve
-    df = pd.DataFrame({"y": y_true_binary, "p": y_prob}).sort_values("p")
-
-    fpr = df["p"]
-    tpr = df["y"].cumsum() / max(df["y"].sum(), 1)
+def _plot_roc_curve(y_true, y_prob):
+    fpr, tpr, _ = roc_curve(y_true, y_prob)
+    roc_auc = auc(fpr, tpr)
 
     fig = go.Figure()
-
-    # Random baseline
-    fig.add_trace(go.Scatter(
-        x=[0, 1],
-        y=[0, 1],
-        mode="lines",
-        line=dict(dash="dash"),
-        showlegend=False
-    ))
-
-    # ROC curve
-    fig.add_trace(go.Scatter(
-        x=fpr,
-        y=tpr,
-        mode="lines",
-        name="ROC"
-    ))
+    fig.add_trace(go.Scatter(x=fpr, y=tpr, mode="lines", name=f"AUC={roc_auc:.2f}"))
+    fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode="lines", name="Chance"))
 
     fig.update_layout(
-        title=title,
         xaxis_title="False Positive Rate",
         yaxis_title="True Positive Rate",
-        template="plotly_white"
+        title="ROC Curve",
     )
-
-    fig.write_html(outpath)
     return fig
 
 

@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 from course.unsupervised_classification.visual_eda import (
-  summary_stats, generate_raw_boxplot, generate_scaled_boxplot, generate_scatterplot)
+    summary_stats, generate_raw_boxplot, generate_scaled_boxplot, generate_scatterplot)
 
 
 def task_check_cache():
@@ -10,7 +10,7 @@ def task_check_cache():
         models_path = Path("data_cache/models")
         models_path.mkdir(parents=True, exist_ok=True)
     return {
-      'actions': [check_cache]
+        'actions': [check_cache]
     }
 
 
@@ -20,7 +20,7 @@ def task_check_vignettes():
         vignettes_path = Path("vignettes/unsupervised/cache")
         vignettes_path.mkdir(parents=True, exist_ok=True)
     return {
-      'actions': [check_vignettes]
+        'actions': [check_vignettes]
     }
 
 
