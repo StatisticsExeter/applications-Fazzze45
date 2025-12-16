@@ -5,14 +5,10 @@ from course.utils import find_project_root
 
 
 def fit_classifier(X_train_path, y_train_path, model_path, classifier):
-    # Load training data
     X_train = pd.read_csv(X_train_path)
-    y_train = pd.read_csv(y_train_path).iloc[:, 0]
+    y_train = pd.read_csv(y_train_path, header=None).squeeze()
 
-    # Fit model directly (NO renaming, NO cleaning)
     classifier.fit(X_train, y_train)
-
-    # Save model
     joblib.dump(classifier, model_path)
 
 

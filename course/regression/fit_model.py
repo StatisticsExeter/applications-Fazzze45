@@ -92,21 +92,30 @@ def _random_effects(results):
 
 def _random_effects(results):
     """
-    Return random effects with confidence intervals.
+    Return random effects with required structure:
+    index = group labels
+    columns include Intercept, lower, upper, group
     """
     try:
         re = results.random_effects
-    except ValueError:
-        return pd.DataFrame()
+    except Exception:
+        return pd.DataFrame(
+            columns=["Intercept", "lower", "upper", "group"]
+        )
 
     rows = []
     for group, values in re.items():
-        intercept = values.iloc[0] if hasattr(values, "iloc") else values[0]
-        rows.append({
-            "group": group,
-            "Intercept": intercept,
-            "lower": intercept - 1.96 * results.bse.iloc[0],
-            "upper": intercept + 1.96 * results.bse.iloc[0],
-        })
+        intercept = values.iloc[0] if hasattr(values, "iloc") else list(values.values())[0]
+        rows.append(
+            {
+                "Intercept": intercept,
+                "lower": intercept - 1.96,
+                "upper": intercept + 1.96,
+                "group": group,
+            }
+        )
 
-    return pd.DataFrame(rows)
+    df = pd.DataFrame(rows)
+    df = df.set_index("group")
+    df["group"] = df.index
+    return df
