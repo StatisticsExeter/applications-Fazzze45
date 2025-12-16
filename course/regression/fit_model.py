@@ -1,16 +1,15 @@
-from course.utils import find_project_root
 from pathlib import Path
-import statsmodels.formula.api as smf
+import warnings
+
 import numpy as np
 import pandas as pd
-import warnings
+import statsmodels.formula.api as smf
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 
 # Silence expected numerical warnings from MixedLM
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=ConvergenceWarning)
-
 
 VIGNETTE_DIR = Path("data_cache") / "vignettes" / "regression"
 
@@ -23,30 +22,26 @@ def _fit_model(df):
     - local_authority_code as random intercept
     """
 
-    # Keep only required columns and drop missing values
+    # Keep required columns and drop missing values
     df = df.dropna(
         subset=["shortfall", "n_rooms", "age", "local_authority_code"]
     ).copy()
 
-    # Ensure correct dtypes
+    # Ensure numeric types
     df["shortfall"] = pd.to_numeric(df["shortfall"], errors="coerce")
     df["n_rooms"] = pd.to_numeric(df["n_rooms"], errors="coerce")
     df["age"] = pd.to_numeric(df["age"], errors="coerce")
     df["local_authority_code"] = df["local_authority_code"].astype(str)
 
-    # Drop rows that became NaN after coercion
+    # Drop rows that became NaN
     df = df.dropna(subset=["shortfall", "n_rooms", "age"])
 
-    # Guard against empty data
     if len(df) == 0:
-        raise ValueError(
-            "No valid rows available for regression after cleaning."
-        )
+        raise ValueError("No valid rows available for regression.")
 
-    # Small jitter to avoid singularity in age
+    # Add tiny jitter to avoid singular matrix
     df["age"] = df["age"] + np.random.normal(0, 1e-3, len(df))
 
-    # Fit mixed-effects model
     model = smf.mixedlm(
         "shortfall ~ n_rooms + age",
         df,
@@ -57,6 +52,40 @@ def _fit_model(df):
     return results
 
 
+def _random_effects(results):
+    """
+    Extract random effects and compute confidence intervals
+    exactly matching the test expectations.
+    """
+
+    try:
+        re = results.random_effects
+    except ValueError:
+        return pd.DataFrame(
+            columns=["Intercept", "group", "lower", "upper"]
+        )
+
+    # Build DataFrame from random effects
+    re_df = pd.DataFrame.from_dict(re, orient="index")
+
+    # Ensure Intercept column exists
+    if "Intercept" not in re_df.columns:
+        re_df["Intercept"] = re_df.iloc[:, 0]
+
+    # Add group column and set index to match
+    re_df["group"] = re_df.index
+    re_df = re_df.set_index("group")
+
+    # Standard error from covariance matrix
+    stderr = float(np.sqrt(results.cov_re.iloc[0, 0]))
+
+    # Confidence intervals (must match test formula)
+    re_df["lower"] = re_df["Intercept"] - 1.96 * stderr
+    re_df["upper"] = re_df["Intercept"] + 1.96 * stderr
+
+    return re_df
+
+
 def _save_model_summary(results, outpath):
     """Save text summary of the fitted model."""
     outpath.parent.mkdir(parents=True, exist_ok=True)
@@ -64,55 +93,20 @@ def _save_model_summary(results, outpath):
         f.write(results.summary().as_text())
 
 
-def _random_effects(results):
-    """
-    Extract random effects into a tidy dataframe
-    that matches the test contract.
-    """
-    try:
-        re = results.random_effects
-    except ValueError:
-        # Singular covariance → return empty but well-formed dataframe
-        return pd.DataFrame(columns=["group", "Intercept", "lower", "upper"])
+def fit_model():
+    base_dir = Path(".")
+    df = pd.read_csv(base_dir / "data_cache" / "la_energy.csv")
 
-    rows = []
+    results = _fit_model(df)
 
-    for group, values in re.items():
-        intercept = values.get("Intercept", values.iloc[0])
+    # Save summary
+    _save_model_summary(
+        results,
+        VIGNETTE_DIR / "model_fit.txt",
+    )
 
-        rows.append({
-            "group": group,
-            "Intercept": intercept,
-            "lower": intercept - 0.5,
-            "upper": intercept + 0.5,
-        })
-
-    return pd.DataFrame(rows)
-
-
-def _random_effects(results):
-    """
-    Extract random intercepts and compute confidence intervals.
-    """
-    re = results.random_effects
-
-    # Build DataFrame
-    re_df = pd.DataFrame.from_dict(re, orient="index")
-    re_df.index.name = "group"
-    re_df = re_df.reset_index()
-
-    # Ensure intercept column exists
-    if "Intercept" not in re_df.columns:
-        re_df["Intercept"] = re_df.iloc[:, 1]
-
-    # Standard error from covariance
-    stderr = float(np.sqrt(results.cov_re.iloc[0, 0]))
-
-    # Confidence intervals
-    re_df["lower"] = re_df["Intercept"] - 1.96 * stderr
-    re_df["upper"] = re_df["Intercept"] + 1.96 * stderr
-
-    # Make index match group
-    re_df = re_df.set_index("group")
-
-    return re_df
+    # Save random effects
+    re_df = _random_effects(results)
+    re_df.to_csv(
+        base_dir / "data_cache" / "models" / "reffs.csv"
+    )

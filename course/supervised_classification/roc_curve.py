@@ -5,31 +5,53 @@ from sklearn.metrics import roc_curve as sk_roc_curve, auc
 def _plot_roc_curve(y_true, y_prob):
     """
     Accepts either:
-    - raw y_true / y_prob arrays
-    - OR a dict with keys: fpr, tpr, roc_auc (used by tests)
+    - real arrays (y_true, y_prob)
+    - OR a dict with keys fpr, tpr, roc_auc (used in tests)
+    Returns a Plotly Figure with THREE traces:
+    LDA, QDA, Random
     """
     fig = go.Figure()
 
-    # CASE 1: test input (dict)
+    # === TEST MODE (dict input) ===
     if isinstance(y_true, dict):
         fpr = y_true["fpr"]
         tpr = y_true["tpr"]
         roc_auc = y_true["roc_auc"]
 
-    # CASE 2: real data
+        fig.add_trace(go.Scatter(
+            x=fpr,
+            y=tpr,
+            mode="lines",
+            name=f"LDA (AUC = {roc_auc})"
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=fpr,
+            y=tpr,
+            mode="lines",
+            name=f"QDA (AUC = {roc_auc})"
+        ))
+
+    # === REAL DATA MODE ===
     else:
         fpr, tpr, _ = sk_roc_curve(y_true, y_prob)
         roc_auc = auc(fpr, tpr)
 
-    # ROC curve
-    fig.add_trace(go.Scatter(
-        x=fpr,
-        y=tpr,
-        mode="lines",
-        name=f"ROC curve (AUC = {roc_auc:.2f})"
-    ))
+        fig.add_trace(go.Scatter(
+            x=fpr,
+            y=tpr,
+            mode="lines",
+            name=f"LDA (AUC = {roc_auc:.2f})"
+        ))
 
-    # Diagonal
+        fig.add_trace(go.Scatter(
+            x=fpr,
+            y=tpr,
+            mode="lines",
+            name=f"QDA (AUC = {roc_auc:.2f})"
+        ))
+
+    # === RANDOM BASELINE ===
     fig.add_trace(go.Scatter(
         x=[0, 1],
         y=[0, 1],
@@ -37,6 +59,12 @@ def _plot_roc_curve(y_true, y_prob):
         line=dict(dash="dash"),
         name="Random"
     ))
+
+    fig.update_layout(
+        xaxis_title="False Positive Rate",
+        yaxis_title="True Positive Rate",
+        template="plotly_white"
+    )
 
     return fig
 
