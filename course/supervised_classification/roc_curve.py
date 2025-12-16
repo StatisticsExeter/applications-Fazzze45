@@ -1,5 +1,12 @@
+from pathlib import Path
+
+import pandas as pd
 import plotly.graph_objects as go
 from sklearn.metrics import roc_curve as sk_roc_curve, auc
+
+from course.utils import find_project_root
+
+VIGNETTE_DIR = Path("data_cache") / "vignettes" / "classfication"
 
 
 def _plot_roc_curve(y_true, y_prob):
