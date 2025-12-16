@@ -189,3 +189,4 @@ cache/*
 
 */ci_report.zip
 
+.DS_Store

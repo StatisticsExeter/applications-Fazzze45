@@ -7,6 +7,9 @@ import sys
 import textwrap
 from doit.exceptions import TaskFailed
 
+import pytest
+# pytest.skip("Skipping database-related tasks — PostgreSQL not running locally", allow_module_level=True)
+
 
 def warn_if_in_rstudio():
     """Detect if running under RStudio/reticulate and print a warning."""

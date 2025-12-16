@@ -6,7 +6,7 @@ from course.supervised_classification.predict import pred_lda, pred_qda
 from course.supervised_classification.metrics import metric_report_lda, metric_report_qda
 from course.supervised_classification.split_test_train import test_and_train
 from course.supervised_classification.eda import plot_scatter, get_summary_stats
-from course.supervised_classification.roc_curve import plot_roc_curve
+from course.supervised_classification.roc_curve import roc_curve
 
 
 def task_check_cache_data():
@@ -129,8 +129,14 @@ def task_metrics_qda():
 
 def task_roc_curve():
     return {
-      'actions': [plot_roc_curve],
-      'file_dep': ['data_cache/energy_y_test.csv',
-                   'data_cache/models/qda_y_pred_prob.csv'],
-      'targets': ['vignettes/supervised_classication/roc.html']
+        'actions': [roc_curve],
+        'file_dep': [
+            'data_cache/energy_y_test.csv',
+            'data_cache/models/lda_y_pred_prob.csv',
+            'data_cache/models/qda_y_pred_prob.csv',
+        ],
+        'targets': [
+            'data_cache/vignettes/supervised_classification/roc_lda.png',
+            'data_cache/vignettes/supervised_classification/roc_qda.png',
+        ],
     }
