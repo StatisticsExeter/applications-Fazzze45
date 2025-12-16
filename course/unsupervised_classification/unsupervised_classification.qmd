@@ -1,0 +1,18 @@
+---
+title: "Olive Oil Composition"
+author: "Faizan Syed"
+format:
+  html:
+    embed-resources: true
+---
+
+## Summary Statistics
+
+
+## Raw Box Plot
+
+
+## Scaled Box Plot
+
+
+## Scatter Plot

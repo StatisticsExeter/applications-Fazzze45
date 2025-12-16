@@ -42,6 +42,36 @@ def _plot_caterpillar(re_df, target, title):
 
 def plot_caterpillar():
     base_dir = find_project_root()
+    outpath = VIGNETTE_DIR / 'caterpillar.html'
+    outpath.parent.mkdir(parents=True, exist_ok=True)
+
     re_df = pd.read_csv(base_dir / 'data_cache' / 'models' / 'reffs.csv')
-    fig = _plot_caterpillar(re_df, 'Intercept', '95% CI for local authority random effects')
-    fig.write_html(VIGNETTE_DIR / 'caterpillar.html')
+
+    # ✅ SAFETY GUARD — handle singular random effects
+    required_cols = {'lower', 'upper', 'group'}
+    if re_df.empty or not required_cols.issubset(re_df.columns):
+        fig = go.Figure()
+        fig.update_layout(
+            title='95% CI for local authority random effects',
+            annotations=[
+                dict(
+                    text='Random effects could not be estimated due to singular covariance.',
+                    x=0.5,
+                    y=0.5,
+                    showarrow=False,
+                    xref='paper',
+                    yref='paper',
+                )
+            ],
+            template='plotly_white'
+        )
+        fig.write_html(outpath)
+        return
+
+    # ✅ Normal case (random effects exist)
+    fig = _plot_caterpillar(
+        re_df,
+        'Intercept',
+        '95% CI for local authority random effects'
+    )
+    fig.write_html(outpath)

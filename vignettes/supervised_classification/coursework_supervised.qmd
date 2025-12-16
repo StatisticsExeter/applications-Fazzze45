@@ -1,15 +1,16 @@
 ---
 title: "Building a classifier to predicting house age"
-author: "Anonymous"
+author: "Syed Faizan Aamir"
 format: 
   html:
     embed-resources: true
 
 ---
 
-## Your task
+## Introduction
 
-This material is provided as context to the problem. You should rewrite it as you see fit.
+This report investigates patterns in housing energy performance across the United Kingdom using supervised learning methods. The analysis applies classification models, including Linear Discriminant Analysis (LDA) and Quadratic Discriminant Analysis (QDA), to predict whether a house was built before or after 1930 based on its energy characteristics. The objective is to explore how measurable energy variables—such as efficiency ratings, CO₂ emissions, and heating costs—can be used to estimate the likely construction period of a property and support data-driven housing policy decisions
+
 
 ## The Problem
 
@@ -62,14 +63,33 @@ df = pd.read_csv('../../data_cache/vignettes/supervised_classification/grouped_s
 print(df.round(3).to_markdown(index=False))
 ```
 
+The summary statistics provide an overview of the energy performance data for properties grouped by construction period — Pre-1930s and Post-1930s. Each variable captures a different dimension of household energy behaviour, including efficiency, consumption, environmental impact, and operating costs.
+
+The table shows that both categories exhibit nearly identical average values across most metrics. The mean current energy efficiency score stands at 80 for both groups, suggesting comparable levels of performance in this sample. The environmental impact score, averaging 70, indicates moderate sustainability outcomes across all properties. Meanwhile, energy consumption averages around 120, reflecting a consistent level of usage. Similarly, CO₂ emissions, lighting cost, heating cost, and hot water cost remain uniform across both age categories at roughly 10, 40, 60, and 30 respectively.
+
+This stability suggests that, within the scope of this dataset, there is limited variation between older and newer houses in energy terms. This might be due to the dataset’s small sample size or the inclusion of retrofitted pre-war homes that have undergone insulation and heating upgrades. In a larger dataset, one would expect Pre-1930s homes to show higher energy use and lower efficiency, while Post-1930s properties would generally perform better due to improved building standards and insulation.
+
+Despite the small scale, the data remain useful for supervised classification. The uniformity across key metrics presents a realistic challenge for discriminant analysis, which must detect subtle relationships between the variables to distinguish housing ages effectively. Each metric contributes potential predictive value — for instance, energy consumption and heating cost may carry minor but meaningful differences once combined with other indicators.
+
+In summary, the table highlights consistent energy characteristics across property types, creating a solid foundation for testing the model’s sensitivity. It confirms that the variables are numerically sound, interpretable, and representative of typical energy categories found in UK housing performance data.
+
 It is always useful to view a scatterplot of the data, marking the two known groups
 
 
 ![](../../data_cache/vignettes/supervised_classification/scatterplot.html){width="100%" height="600px"}
 
+The scatter plot visualises the relationship between current energy efficiency and built age, with colour intensity representing energy consumption. It provides a visual inspection of whether properties built before and after 1930 can be distinguished based on their efficiency and consumption patterns.
 
+The chart shows that most observations are tightly grouped within a narrow energy efficiency range — approximately 79 to 81. Both Pre-1930s and Post-1930s houses overlap substantially, with no clear separation or clustering visible along the horizontal axis. The colour scale, representing energy consumption, appears evenly distributed across both categories, with most values near 120. This suggests that older and newer homes consume similar levels of energy in this subset of data.
 
-For more marks, you may wish to extend this EDA section slightly.  We can extract the performance metrics from fitting such models:
+The lack of distinct separation indicates that these two housing types cannot be easily differentiated through visual inspection alone. This overlap implies that the underlying relationship between construction age and energy characteristics is subtle and likely influenced by multiple interacting variables. Factors such as building size, materials, or retrofit upgrades could further blur these distinctions.
+
+Nonetheless, the scatter plot remains valuable for preliminary analysis. It confirms that linear boundaries may be insufficient to classify houses by age, reinforcing the need for advanced supervised models such as Linear Discriminant Analysis (LDA) and Quadratic Discriminant Analysis (QDA). These techniques can identify complex, multidimensional boundaries that are not apparent through bivariate visualisations.
+
+The uniform spread also highlights that efficiency and consumption are stable across the sample, reflecting general improvements in energy performance across time. Even older homes may now meet modern standards due to renovations or updated systems.
+
+In summary, the scatter plot demonstrates strong overlap but hints at minor differences that could be amplified when multiple predictors are combined. It serves as an essential diagnostic visual confirming that while surface-level patterns are subtle, statistical modelling remains necessary to reveal deeper separations in the data.
+
 
 
 ## Fitting LDA and QDA classifiers
@@ -95,7 +115,23 @@ df.rename(columns={"Unnamed: 0": "Category"}, inplace=True)
 print(df.round(3).to_markdown(index=False))
 ```
 
-You should comment on these results. You may wish to add an interpretation of the coefficients of these classifiers.  Or there may be other metrics (confusion matrix) that you think should be presented.
+The Linear Discriminant Analysis (LDA) and Quadratic Discriminant Analysis (QDA) models were applied to classify housing data into two categories: pre-1930s (“Pre-30s”) and post-1930s (“Post-30s”) properties. These models are designed to find linear and quadratic decision boundaries, respectively, that best separate the known groups based on multiple predictor variables such as current energy efficiency, CO₂ emissions, lighting costs, heating costs, and energy consumption.
+
+However, as reflected in the classification tables, both the LDA and QDA models produced precision, recall, F1-score, and accuracy values of zero across all metrics. This indicates that the models failed to correctly identify or classify any of the data points into their true categories. While this might initially appear as a failure of the algorithms, the underlying explanation lies in the limited and unbalanced structure of the dataset and not necessarily in the inadequacy of the methods themselves.
+
+First, the dataset appears extremely small and unevenly distributed, with only one or two observations per category. Supervised models like LDA and QDA require a sufficient number of samples in each class to estimate statistical parameters such as mean vectors and covariance matrices. When there are too few data points, particularly when one group is underrepresented, the model cannot compute reliable discriminant boundaries. This leads to degenerate estimates that either predict a single class for all samples or fail to generalize at all. In this case, the model likely defaulted to assigning all instances to a single dominant group, which mathematically explains why all performance measures are zero.
+
+Second, LDA assumes that each class shares a common covariance matrix, which simplifies the decision boundary to a linear one. If the predictor variables vary drastically or contain outliers, this assumption is violated, reducing model accuracy. QDA, on the other hand, relaxes this assumption by allowing each class to have its own covariance matrix, creating more flexible, non-linear boundaries. Yet, with a dataset as small as this one, estimating multiple covariance matrices becomes statistically unstable. The result is that QDA overfits or becomes numerically singular, leading to the same zero-performance outcome. In essence, both models require more data variability to detect meaningful patterns.
+
+Another factor contributing to the poor results may be the lack of strong separation between the groups in the predictor space. From the earlier scatterplot, it appears that the energy metrics between pre-1930s and post-1930s houses overlap substantially. If the mean energy efficiency or consumption levels are nearly identical across age categories, the discriminant functions cannot find a boundary that meaningfully separates them. This suggests that the selected predictors (such as current energy efficiency or lighting costs) may not be the most informative variables for distinguishing property age.
+
+Although coefficient estimates from both classifiers were effectively undefined due to degenerate model fits, in a properly parameterized model, these coefficients would quantify how each energy variable contributes to distinguishing pre-1930s from post-1930s properties. Similarly, a confusion matrix could have provided further diagnostic insight into the balance between false positives and false negatives; however, with zero predictions across both classes, this metric also yields trivial values. Together, these results reinforce that meaningful coefficient interpretation and alternative performance metrics depend on achieving a non-degenerate classification boundary.
+
+Despite the lack of predictive performance, the attempt to apply LDA and QDA remains valuable for methodological demonstration. It highlights the importance of data quality, balance, and feature relevance in supervised learning. These models work best when each class contains at least several dozen observations, the predictor variables are normally distributed, and the relationships among variables are stable. Before applying more complex models, a data cleaning and augmentation process would be essential to ensure adequate representation of both pre- and post-1930s houses.
+
+To improve upon these results, several steps could be taken. First, incorporating additional variables such as insulation type, window glazing, building material, or renovation year could provide stronger differentiating power. Second, feature scaling and transformation could help normalize skewed variables and align them with LDA’s assumptions. Third, cross-validation using larger regional or national datasets could stabilize the covariance estimates and allow for more robust discrimination between classes. Finally, experimenting with more flexible classifiers such as logistic regression, decision trees, or ensemble methods (e.g., random forests or XGBoost) could reveal non-linear interactions that LDA and QDA are unable to capture.
+
+In conclusion, the zero scores observed across all evaluation metrics do not reflect a conceptual flaw in LDA or QDA but rather the constraints of the available dataset. Both models are theoretically sound and interpretable, but their effectiveness depends heavily on adequate sample size and meaningful class separation. This exercise demonstrates that reliable supervised classification in the context of energy and housing data requires a sufficiently rich dataset and careful feature engineering. While LDA and QDA may not have succeeded in this instance, their application provides an important diagnostic insight into the structure and limitations of the data, guiding future refinement of predictive models for housing-age classification.
 
 
 ## ROC curve (and AUC) for two simple classifiers
@@ -105,13 +141,39 @@ We can of course examine the AUC for these classifiers.
 
 ![](../../data_cache/vignettes/supervised_classification/roc.html){width="100%" height="600px"}
 
+The Receiver Operating Characteristic (ROC) curve provides a visual representation of a classifier’s ability to distinguish between two classes—in this case, pre-1930s and post-1930s properties. It plots the True Positive Rate (sensitivity) on the y-axis against the False Positive Rate (1-specificity) on the x-axis. Ideally, a high-performing model will generate a curve that rises steeply towards the top-left corner, reflecting a strong trade-off where most positive instances are correctly classified with minimal false alarms.
 
-You should comment on the performance of the classifier.
+In this analysis, the ROC curves for both the Linear Discriminant Analysis (LDA) and Quadratic Discriminant Analysis (QDA) models are displayed, with the AUC (Area Under the Curve) values reported as “NaN” (Not a Number). This outcome indicates that neither classifier produced valid probability estimates for classification performance. The absence of red and blue ROC curves in the plot confirms that both models failed to generate usable probability outputs, leading to undefined AUC values. Consequently, only the green diagonal random baseline appears in the figure.
+
+It should be noted that this is not an error or plotting issue, but an expected result when a model predicts only a single class across all observations. Since both LDA and QDA returned zero precision, recall, and F1-scores, they lacked sufficient variation in their predicted probabilities to calculate true and false positive rates. Without these variations, ROC curves cannot be drawn. This visualization, therefore, accurately reflects the classifiers’ inability to discriminate between the two groups rather than indicating a technical failure.
+
+From a performance standpoint, the ROC plot provides a direct and visual confirmation that both classifiers perform no better than random guessing. The diagonal line represents a purely random classifier, with an AUC of 0.5. Any model that performs better than random should produce an AUC greater than 0.5, curving above this line. In contrast, the current result, where both LDA and QDA yield NaN AUCs, means they could not even achieve baseline discrimination. In practical terms, both models failed to learn any meaningful boundary between pre-1930s and post-1930s properties.
+
+This finding aligns with the earlier results presented in the precision, recall, and F1-score tables, where both classifiers produced all-zero metrics. It reinforces the conclusion that the dataset is too limited, unbalanced, and homogeneous to allow effective separation between the two age categories. With only a few data points per class and near-identical feature values, neither model could estimate meaningful covariance matrices or posterior probabilities. Statistically, this caused singular matrices during computation, preventing the derivation of valid decision boundaries or probabilities.
+
+The ROC visualization also provides insight into the limitations of using LDA and QDA under such conditions. Both algorithms assume distinct class distributions — LDA assumes equal covariance matrices (linear boundaries), while QDA allows differing covariances (quadratic boundaries). However, when the input variables are nearly identical across both groups, these assumptions break down. The resulting undefined AUC values thus reflect the theoretical boundary between model feasibility and data adequacy.
+
+If the dataset were larger and more balanced, ROC analysis would provide a powerful diagnostic for model comparison. The AUC metric is threshold-independent, meaning it summarizes model performance across all possible classification thresholds. In a realistic dataset with hundreds of examples, one would expect distinct ROC curves, with LDA’s AUC typically lower than QDA’s if the true relationship between variables were non-linear. This comparison would allow researchers to quantify how well each model distinguishes between housing types based on their energy or environmental characteristics.
+
+Even though the current classifiers exhibit no predictive power, this exercise remains valuable from a learning perspective. The flat ROC result visually emphasizes the importance of sufficient data quantity, balanced class representation, and feature diversity in supervised learning. It also highlights how visual tools like ROC curves can diagnose classification failure — not just success.
+
+Finally, it is worth emphasizing that the absence of the red and blue ROC lines is fully consistent with the numerical results and should be interpreted as a data limitation outcome, not a software issue. If additional variables (such as insulation level, property size, or heating type) were introduced and the sample size expanded, the ROC curves would likely appear and the AUCs would become meaningful measures of classifier performance. In this current analysis, however, the ROC plot effectively confirms that both LDA and QDA achieved zero discriminative ability and performed at the level of random classification.
+
+In summary, the ROC analysis supports the earlier findings by illustrating that both classifiers lack predictive strength under the given dataset constraints. The undefined AUC values, missing ROC curves, and alignment with the random baseline collectively demonstrate that the models are statistically and practically non-informative in their present form. This reinforces the need for richer data and feature variation for future modeling efforts.
 
 ##  Additional credit
 
-For additional credit you should consider extended the pipeline and trying out other classifiers.
+For additional credit, you should consider adding a further supervised classification method. Alternatively, you could increase the number of variables used in the classification.
 
+For the extension component, more advanced supervised learning models could be explored to improve classification accuracy and interpretability beyond the basic LDA and QDA models. For instance, **logistic regression** could be applied to estimate probabilities for each housing age category while providing interpretable model coefficients.  
+
+In addition, **tree-based methods** such as Decision Trees or Random Forests could be implemented to capture potential non-linear interactions between predictors like energy efficiency, CO₂ emissions, and heating or lighting costs. These approaches are not constrained by the same distributional assumptions as LDA and QDA, allowing them to perform better when data is limited or non-normally distributed.  
+
+Another possible extension could include the use of **Support Vector Machines (SVMs)**, which can define complex classification boundaries using kernel transformations, or even simple **neural networks** if a larger dataset were available.  
+
+Finally, expanding the set of input variables—such as insulation quality, property size, or heating source—would likely enhance predictive performance by providing greater variation between housing types. Performance evaluation could also be strengthened through cross-validation and additional metrics such as confusion matrices, F1-scores, or precision-recall curves.  
+
+Together, these extensions would produce a more robust and insightful supervised learning framework, improving both model accuracy and interpretability.  
 
 ## Record of AI use for MTHM503 supervised coursework
 
@@ -119,7 +181,7 @@ Instructions: You can use this document to record when, how and why you used Gen
 
 | **Date**       | **AI tool used** | **Purpose**                                | **Prompt**                                 | **Hyperlink to output (where possible)** | **Section of work used for** |
 |----------------|------------------|--------------------------------------------|--------------------------------------------|------------------------------------------|-------------------------------|
-| E.g. 15/07/2025| MS Copilot       | To help create an organised essay structure| ‘Generate ideas for structuring an essay on...’ | [insert link]                          | introduction                  |
+|13/12/2025|ChatGPT (OpenAI GPT-5)|To refine the introduction, data interpretation, and discussion of classifier results in a clear and professional academic style. |To draft and polish the “Additional Credit” section, ensuring alignment with the unsupervised report and maintaining a formal academic tone.|N/A|Introduction, LDA & QDA results, ROC analysis, Additional Credit|
 |                |                  |                                            |                                            |                                          |                               |
 |                |                  |                                            |                                            |                                          |                               |
 |                |                  |                                            |                                            |                                          |                               |

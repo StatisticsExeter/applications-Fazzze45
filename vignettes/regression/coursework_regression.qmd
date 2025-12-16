@@ -1,6 +1,6 @@
 ---
 title: "Understanding costs"
-author: "Anonymous"
+author: "Syed Faizan Aamir"
 format: 
   html:
     embed-resources: true
@@ -10,9 +10,11 @@ format:
 
 
 
-## Your task
+## Introduction
 
-This material is provided as context to the problem. You should rewrite it as you see fit.
+This report investigates how property characteristics influence carbon emissions across UK local authorities using data from national Energy Certificates. The analysis applies a mixed linear regression model to explore how building age and number of heated rooms affect the average carbon footprint of homes. By incorporating both fixed effects (to capture structural factors like property age and size) and random effects (to account for regional variation), the model aims to identify patterns that explain why some local authorities perform better in reducing emissions than others.
+
+The objective is to use statistical modelling to understand how housing attributes and local conditions interact to shape energy performance. This helps inform strategies for improving building efficiency and supports evidence-based policymaking on carbon reduction and sustainability in the housing sector.
 
 ## The Problem
 
@@ -49,6 +51,19 @@ Some initial exploratory data analysis shows us how the carbon emissions vary by
 
 ![](../../data_cache/vignettes/regression/boxplot_rooms.html){width="100%" height="600px"}
 
+The dataset used in this analysis is derived from the national Energy Certificates database, which records property-level information across the United Kingdom, including energy efficiency, carbon emissions, and structural features. The purpose of this exploratory stage is to understand how housing characteristics—particularly the age of the property and the number of heated rooms—affect carbon emission levels. The variable of interest, shortfall, represents the estimated carbon shortfall or emissions value associated with each property group. Through initial exploratory data analysis, relationships between emissions, building age, and room count are visualized to identify possible linear patterns that will inform the regression modelling stage.
+
+The first plot, showing shortfall against age, illustrates the distribution of average carbon emissions for properties constructed around different time periods (e.g., pre-1930, 1935, 1950). The overall trend line appears nearly flat, indicating minimal variation in emission shortfall across different property ages within the available sample. This suggests that, within the limited subset analyzed, older homes do not necessarily exhibit significantly higher emissions than newer ones. However, this outcome may be influenced by the small sample size or the possibility that many older properties have undergone energy retrofitting, reducing the expected age-based disparity. Typically, one would expect pre-1930 housing stock to have higher emissions due to outdated insulation, single glazing, and inefficient heating systems. Therefore, the near-constant pattern visible in the graph likely reflects data sparsity rather than the absence of a true relationship.
+
+The second plot, showing shortfall against the number of rooms, similarly presents a flat trend, suggesting no visible correlation between house size and emission shortfall within this sample. Ordinarily, properties with a greater number of heated rooms would have higher emissions due to increased energy consumption for heating and lighting. However, this uniform pattern again likely reflects the small number of observations and limited variability in the dataset rather than an absence of an underlying relationship. It may also indicate that the properties considered in this dataset have comparable heating efficiency levels or have been normalized for size in the calculation of emissions.
+
+Both plots serve an important diagnostic role in the modelling process. They help confirm whether the data meet basic assumptions of linearity and whether any clear outliers or nonlinear trends are present. In this case, the visualizations suggest that the relationships are weak or indeterminate, implying that statistical modelling is required to detect any subtle or underlying effects. Additionally, since the dataset includes multiple local authorities, these plots represent aggregate summaries; they may conceal region-specific differences that the random-effects component of the mixed model will later account for.
+
+Another observation from the plots is that the shortfall variable remains consistently around the same mean value (approximately 10), regardless of age or room count. This uniformity suggests that variation between observations is small, which can affect model performance by reducing the ability to distinguish between predictors. When such homogeneity exists, incorporating random effects (as done in the mixed linear model) helps capture unobserved differences between local authorities, effectively separating noise from meaningful signal.
+
+From a policy perspective, the data visualization underscores the challenge of measuring emission differences when working with limited or aggregated information. While exploratory plots provide a useful first step in identifying broad tendencies, they cannot, on their own, establish statistical significance or directionality. Therefore, the next stage—fitting the mixed linear regression model—allows for a more precise estimation of how age and room count contribute to emissions after controlling for local variation.
+
+In summary, the exploratory analysis reveals that while no strong visual trends are apparent between shortfall and either property age or number of rooms, this does not imply that no relationship exists. The flat lines observed in both plots likely result from the limited number of data points, the aggregation of results by authority, and the uniformity of measured shortfall values. Consequently, the regression model will be essential in quantifying the fixed and random effects that drive these emissions patterns and in assessing whether any significant differences exist across housing types and regional authorities.
 
 ## The model
 
@@ -64,6 +79,21 @@ with open('../../data_cache/vignettes/regression/model_fit.txt') as f:
     print(content)
 ```
 
+A mixed linear regression model was fitted to assess how key housing characteristics—specifically the number of rooms and age of the property—influence average carbon emissions, measured as shortfall. This approach combines fixed effects, which represent measurable property-level features, with random effects, which capture differences across local authorities. The model structure is particularly suitable for this dataset, as it acknowledges that homes within the same authority may share environmental and structural similarities that could influence energy efficiency.
+
+The model output confirms successful convergence, with a log-likelihood of 94.9939, meaning the estimation process ran without errors. However, the small number of observations (three in total) suggests this analysis primarily demonstrates methodology rather than producing statistically generalizable results. Despite this limitation, the model still provides valuable insight into the relationship between property characteristics and energy emissions.
+
+The intercept coefficient of −1.118 represents the baseline emission shortfall when both the number of rooms and age variables are set to zero. While negative emissions are not physically meaningful, this intercept functions as a constant offset, anchoring the regression equation. It essentially adjusts the overall model scale rather than providing direct interpretive value.
+
+The coefficient for the number of rooms (0.185) indicates a positive relationship with emission shortfall. In practical terms, this suggests that, all else equal, properties with more heated rooms tend to produce slightly higher emissions. This finding aligns with expectations, as larger homes typically require more energy for heating and lighting. However, the extremely low p-value (0.000) in this limited dataset should not be taken as evidence of strong statistical significance. Rather, it likely reflects numerical precision given the very small sample size. In a more robust dataset, we would expect this positive association to remain, though the magnitude might vary depending on insulation quality, heating systems, and occupancy behavior.
+
+The age variable has a coefficient of 0.000 with a z-score of 1.446 and a p-value of 0.148, suggesting that within this dataset, property age does not significantly explain differences in emissions. This result echoes the earlier exploratory data analysis, where a nearly flat trend line was observed between shortfall and property age. In practice, the weak relationship here may stem from the limited data range—properties categorized only as pre- or post-1930—and the very small sample size, which limits statistical differentiation.
+
+The group variance of 0.000 indicates that the random effect for local authority contributes no additional variation to the model in this case. This likely occurs because all observations fall within a single authority or share nearly identical emission levels. In a larger dataset with multiple authorities, this random term would capture meaningful regional differences, helping to identify areas with systematically higher or lower emissions after adjusting for structural factors.
+
+While the numerical results should be interpreted cautiously, this model demonstrates the theoretical strength of mixed-effects regression. It provides a framework for analyzing both within-group and between-group variation, allowing for more nuanced conclusions about energy performance drivers. In a full application, model fit could be enhanced through diagnostic tests, inclusion of additional variables (such as floor area or insulation type), and cross-validation using a larger sample.
+
+Overall, the mixed linear model successfully illustrates how statistical modelling can identify patterns in building efficiency. Though limited by data scale, the results highlight a likely positive association between home size and emissions, while suggesting that property age alone may not strongly influence carbon shortfall. By integrating both fixed and random effects, this approach offers a structured method for understanding how local conditions and property characteristics collectively shape energy performance.
 
 ## The key insight
 
@@ -72,9 +102,29 @@ We've been asked to rate local authority performance, so the most important resu
 
 ![](../../data_cache/vignettes/regression/caterpillar.html){width="100%" height="600px"}
 
+The central objective of this analysis is to evaluate local authority performance in reducing carbon emissions once property-level characteristics have been accounted for. The caterpillar plot presented above provides a visual summary of the random effects from the mixed linear model. Each point on the plot represents a local authority’s deviation from the overall average emission level, adjusted for property age and number of rooms. The inclusion of 95% confidence intervals allows for a visual comparison of how much each authority’s performance differs from the national mean, and whether such differences are statistically significant.
+
+In this case, the caterpillar plot shows only one data point (labelled E08000033), which corresponds to a single local authority. The blue point represents the random intercept, indicating the authority’s estimated deviation from the overall model intercept, while the dashed red line at zero denotes the average across all authorities. The positioning of this blue point close to zero suggests that this authority performs roughly in line with the national mean after controlling for housing characteristics. The narrow confidence band around this point further implies that there is minimal uncertainty in this estimate, although this precision is largely an artefact of the extremely small dataset rather than true empirical robustness.
+
+In a broader dataset containing multiple authorities, the caterpillar plot would provide a ranking of authorities from the lowest to the highest estimated random effects. Authorities positioned to the left of the zero line would be interpreted as performing better than average—meaning they have lower emissions after accounting for structural factors—while those to the right would be performing worse than average, generating higher adjusted emissions. This visual ranking is highly effective for identifying outliers and potential regional disparities in energy performance.
+
+The simplicity of this plot belies its analytical value. It directly reflects the model’s capacity to separate systematic regional differences from noise. In this analysis, the absence of significant variation across local authorities suggests that, at least within the given sample, differences in emissions are primarily driven by property-level factors such as home size rather than local policy or environmental context. The result also aligns with the zero group variance reported in the model output, confirming that local authority differences do not substantially influence emission outcomes in this limited case.
+
+From a policy perspective, this type of random-effects visualization is extremely valuable. When applied to a full national dataset, it would enable policymakers to identify which local authorities consistently outperform or underperform after accounting for housing characteristics. Such information could guide targeted policy interventions—for example, offering additional retrofitting grants to underperforming regions or replicating best practices from high-performing authorities. Furthermore, the confidence intervals provide a measure of reliability for these comparisons, helping analysts distinguish genuine performance differences from random variation.
+
+It is also worth noting that, in practice, random effects can capture a range of unobserved local influences—such as regional climate, housing density, or administrative energy policies—that are not explicitly modelled in the fixed effects. Therefore, expanding the dataset to include multiple authorities would make this plot far more informative, allowing for the identification of regional clusters and systematic performance gaps.
+
+In summary, the caterpillar plot serves as a concise yet powerful visual representation of local authority performance after adjusting for property-level characteristics. Although the single point shown here offers limited insight due to the small sample size, it effectively demonstrates how mixed-effects models can isolate the impact of local governance and contextual conditions. With a more comprehensive dataset, this approach could form the basis for an evidence-driven evaluation of local energy policy effectiveness—empowering both national and regional authorities to reduce emissions more strategically and equitably across the housing sector.
+
 ##  Additional credit
 
-For additional credit you might like to enhance the exploratory data analysis. You could consider residual diagnostics to check the validity of the model fit. You may also like to consider the appropriateness of the adjusting variables age and number of rooms. You could consider extracting further variables from the database and fitting a slightly more elaborate model.
+For additional credit you should consider enhancing the regression model by exploring further diagnostic and validation techniques. Alternatively, you could increase the number of explanatory variables included in the analysis to provide a richer understanding of emission variation.
+
+For the extension component, one possible improvement would involve conducting residual diagnostics to test model validity and identify any deviations from assumptions such as linearity, homoscedasticity, or normality. This would ensure that the model provides a robust representation of the relationship between property characteristics and emission shortfall.
+
+Another approach for extension would be to introduce interaction effects between variables such as property age and number of rooms to explore whether larger, older homes have disproportionately higher emissions. Additionally, new variables such as insulation quality, heating type, or regional energy policy indicators could be incorporated to improve explanatory power.
+
+Finally, future analysis could compare the performance of this mixed linear model with alternative modelling frameworks, such as generalized least squares or Bayesian hierarchical models. These approaches could provide greater flexibility in handling complex data structures and improve the model’s predictive accuracy. Together, these extensions would enhance both the interpretability and the practical value of the analysis.
 
 
 ## Record of AI use for MTHM503 Regression coursework
@@ -83,7 +133,7 @@ Instructions: You can use this document to record when, how and why you used Gen
 
 | **Date**       | **AI tool used** | **Purpose**                                | **Prompt**                                 | **Hyperlink to output (where possible)** | **Section of work used for** |
 |----------------|------------------|--------------------------------------------|--------------------------------------------|------------------------------------------|-------------------------------|
-| E.g. 15/07/2025| MS Copilot       | To help create an organised essay structure| ‘Generate ideas for structuring an essay on...’ | [insert link]                          | introduction                  |
+|14/12/2025|Chatgpt (OpenAi GPT-5)|To help draft polished and concise written interpretations for regression outputs and explanatory sections|“Write a professional and concise interpretation for the regression model and additional credit sections for MTHM503 coursework”|N/A| Introduction,The Model, The Key Insight, Additional Credit|
 |                |                  |                                            |                                            |                                          |                               |
 |                |                  |                                            |                                            |                                          |                               |
 |                |                  |                                            |                                            |                                          |                               |
