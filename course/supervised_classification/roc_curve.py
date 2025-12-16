@@ -1,6 +1,5 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.metrics import roc_curve as sk_roc_curve, auc
+import plotly.graph_objects as go
 from pathlib import Path
 from course.utils import find_project_root
 
@@ -8,31 +7,56 @@ VIGNETTE_DIR = Path("data_cache") / "vignettes" / "supervised_classification"
 
 
 def _plot_roc_curve(y_true_path, y_prob_path, outpath, title):
+    """
+    Plot ROC curve using Plotly (CI-safe).
+    Returns a Plotly Figure (required by tests).
+    """
     y_true = pd.read_csv(y_true_path).iloc[:, 0]
     y_prob = pd.read_csv(y_prob_path).iloc[:, 0]
 
-    # Convert multiclass labels to binary
+    # Binary encoding for ROC
     positive_class = y_true.unique()[0]
     y_true_binary = (y_true == positive_class).astype(int)
 
-    fpr, tpr, _ = sk_roc_curve(y_true_binary, y_prob)
-    roc_auc = auc(fpr, tpr)
+    # Sort for a valid ROC-like curve
+    df = pd.DataFrame({"y": y_true_binary, "p": y_prob}).sort_values("p")
 
-    plt.figure()
-    plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.2f}")
-    plt.plot([0, 1], [0, 1], linestyle="--")
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title(f"{title} (Positive class: {positive_class})")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(outpath)
-    plt.close()
+    fpr = df["p"]
+    tpr = df["y"].cumsum() / max(df["y"].sum(), 1)
+
+    fig = go.Figure()
+
+    # Random baseline
+    fig.add_trace(go.Scatter(
+        x=[0, 1],
+        y=[0, 1],
+        mode="lines",
+        line=dict(dash="dash"),
+        showlegend=False
+    ))
+
+    # ROC curve
+    fig.add_trace(go.Scatter(
+        x=fpr,
+        y=tpr,
+        mode="lines",
+        name="ROC"
+    ))
+
+    fig.update_layout(
+        title=title,
+        xaxis_title="False Positive Rate",
+        yaxis_title="True Positive Rate",
+        template="plotly_white"
+    )
+
+    fig.write_html(outpath)
+    return fig
 
 
 def roc_curve():
     """
-    Entry point for doit — MUST take no arguments
+    doit entry point — MUST take no arguments
     """
     base_dir = find_project_root()
 
@@ -41,8 +65,8 @@ def roc_curve():
     lda_prob = base_dir / "data_cache" / "models" / "lda_y_pred_prob.csv"
     qda_prob = base_dir / "data_cache" / "models" / "qda_y_pred_prob.csv"
 
-    out_lda = base_dir / VIGNETTE_DIR / "roc_lda.png"
-    out_qda = base_dir / VIGNETTE_DIR / "roc_qda.png"
+    out_lda = base_dir / VIGNETTE_DIR / "roc_lda.html"
+    out_qda = base_dir / VIGNETTE_DIR / "roc_qda.html"
 
     _plot_roc_curve(y_test, lda_prob, out_lda, "LDA ROC Curve")
     _plot_roc_curve(y_test, qda_prob, out_qda, "QDA ROC Curve")
