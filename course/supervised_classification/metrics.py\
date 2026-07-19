@@ -9,9 +9,6 @@ def metric_report(y_test_path, y_pred_path, report_path):
     y_test = pd.read_csv(y_test_path)
     y_pred = pd.read_csv(y_pred_path)
 
-    if len(y_test) != len(y_pred):
-        y_test = pd.read_csv(y_test_path, header=None)
-
     # Convert to string to avoid type mismatches
     y_test = y_test.astype(str).apply(lambda x: x.str.strip())
     y_pred = y_pred.astype(str).apply(lambda x: x.str.strip())

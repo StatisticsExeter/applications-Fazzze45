@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 def split_data(base_data_path, X_train_path, y_train_path, X_test_path, y_test_path):
     # Load dataset
     df = pd.read_csv(base_data_path)
+    df = df.dropna(subset=["built_age"])
 
     # Define target and features (NO cleaning, NO renaming)
     y = df["built_age"]

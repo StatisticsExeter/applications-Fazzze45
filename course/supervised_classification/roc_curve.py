@@ -89,7 +89,7 @@ def roc_curve():
     out_dir = base_dir / VIGNETTE_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    y_true = pd.read_csv(y_test_path).iloc[:, 0]
+    y_true = pd.read_csv(y_test_path, header=None).iloc[:, 0]
 
     for name, prob_path in [
         ("lda", lda_prob_path),
