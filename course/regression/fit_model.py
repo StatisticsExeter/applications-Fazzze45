@@ -96,6 +96,21 @@ def fit_model():
 
     results = _fit_model(df)
 
+    residuals = results.resid
+    fitted = results.fittedvalues
+
+    diag_df = pd.DataFrame(
+        {
+            "fitted": fitted,
+            "residual": residuals,
+        }
+    )
+
+    diag_df.to_csv(
+        base_dir / "data_cache" / "models" / "diagnostics.csv",
+        index=False,
+    )
+
     # Save summary
     _save_model_summary(
         results,
