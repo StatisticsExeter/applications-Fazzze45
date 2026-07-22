@@ -7,9 +7,11 @@ from sklearn.metrics import roc_curve as sk_roc_curve, auc
 from course.utils import find_project_root
 
 VIGNETTE_DIR = Path("data_cache") / "vignettes" / "classfication"
+VIGNETTE_DIR = Path("data_cache") / "vignettes" / "supervised_classification"
 
 
 def _plot_roc_curve(y_true, y_prob):
+def _plot_roc_curve(y_true, y_prob, model_name=None):
     """
     Accepts either:
     - real arrays (y_true, y_prob)
@@ -50,12 +52,14 @@ def _plot_roc_curve(y_true, y_prob):
             mode="lines",
             name=f"LDA (AUC = {roc_auc:.2f})"
         ))
+        label = model_name if model_name is not None else "Model"
 
         fig.add_trace(go.Scatter(
             x=fpr,
             y=tpr,
             mode="lines",
             name=f"QDA (AUC = {roc_auc:.2f})"
+            name=f"{label.upper()} (AUC = {roc_auc:.2f})"
         ))
 
     # === RANDOM BASELINE ===
@@ -107,6 +111,28 @@ def roc_curve():
         fig = _plot_roc_curve(
             {"fpr": fpr, "tpr": tpr, "roc_auc": roc_auc},
             None,
+        fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+           x=fpr,
+           y=tpr,
+           mode="lines",
+           name=f"{name.upper()} (AUC = {roc_auc:.2f})"
+        ))
+
+    fig.add_trace(go.Scatter(
+           x=[0, 1],
+           y=[0, 1],
+           mode="lines",
+           line=dict(dash="dash"),
+           name="Random"
+        ))
+
+    fig.update_layout(
+            xaxis_title="False Positive Rate",
+            yaxis_title="True Positive Rate",
+            template="plotly_white"
         )
 
         fig.write_html(out_dir / f"roc_{name}.html")
+    fig.write_html(out_dir / f"roc_{name}.html")
