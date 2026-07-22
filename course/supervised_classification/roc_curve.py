@@ -6,11 +6,9 @@ from sklearn.metrics import roc_curve as sk_roc_curve, auc
 
 from course.utils import find_project_root
 
-VIGNETTE_DIR = Path("data_cache") / "vignettes" / "classfication"
 VIGNETTE_DIR = Path("data_cache") / "vignettes" / "supervised_classification"
 
 
-def _plot_roc_curve(y_true, y_prob):
 def _plot_roc_curve(y_true, y_prob, model_name=None):
     """
     Accepts either:
@@ -46,19 +44,12 @@ def _plot_roc_curve(y_true, y_prob, model_name=None):
         fpr, tpr, _ = sk_roc_curve(y_true, y_prob)
         roc_auc = auc(fpr, tpr)
 
-        fig.add_trace(go.Scatter(
-            x=fpr,
-            y=tpr,
-            mode="lines",
-            name=f"LDA (AUC = {roc_auc:.2f})"
-        ))
         label = model_name if model_name is not None else "Model"
 
         fig.add_trace(go.Scatter(
             x=fpr,
             y=tpr,
             mode="lines",
-            name=f"QDA (AUC = {roc_auc:.2f})"
             name=f"{label.upper()} (AUC = {roc_auc:.2f})"
         ))
 
@@ -108,9 +99,6 @@ def roc_curve():
         fpr, tpr, _ = sk_roc_curve(y_binary, y_prob)
         roc_auc = auc(fpr, tpr)
 
-        fig = _plot_roc_curve(
-            {"fpr": fpr, "tpr": tpr, "roc_auc": roc_auc},
-            None,
         fig = go.Figure()
 
     fig.add_trace(go.Scatter(
@@ -134,5 +122,4 @@ def roc_curve():
             template="plotly_white"
         )
 
-        fig.write_html(out_dir / f"roc_{name}.html")
     fig.write_html(out_dir / f"roc_{name}.html")
