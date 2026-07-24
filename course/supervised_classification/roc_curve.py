@@ -93,7 +93,7 @@ def roc_curve():
         y_prob = pd.read_csv(prob_path).iloc[:, 0]
 
         # Binary conversion (first class as positive)
-        positive_class = y_true.unique()[0]
+        positive_class = "Post-30s"
         y_binary = (y_true == positive_class).astype(int)
 
         fpr, tpr, _ = sk_roc_curve(y_binary, y_prob)

@@ -1,4 +1,5 @@
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
 import pandas as pd
 import joblib
 from course.utils import find_project_root
@@ -30,3 +31,22 @@ def fit_qda():
 
     classifier = DecisionTreeClassifier(random_state=42)
     fit_classifier(X_train_path, y_train_path, model_path, classifier)
+
+
+def fit_logistic():
+    base_dir = find_project_root()
+    X_train_path = base_dir / "data_cache" / "energy_X_train.csv"
+    y_train_path = base_dir / "data_cache" / "energy_y_train.csv"
+    model_path = base_dir / "data_cache" / "models" / "logistic_model.joblib"
+
+    classifier = LogisticRegression(
+        max_iter=1000,
+        random_state=42
+    )
+
+    fit_classifier(
+        X_train_path,
+        y_train_path,
+        model_path,
+        classifier
+    )

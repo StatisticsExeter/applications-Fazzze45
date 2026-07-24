@@ -46,3 +46,41 @@ def pred_qda():
     y_pred_path = base_dir / "data_cache" / "models" / "qda_y_pred.csv"
     y_pred_prob_path = base_dir / "data_cache" / "models" / "qda_y_pred_prob.csv"
     predict(model_path, X_test_path, y_pred_path, y_pred_prob_path)
+
+
+def pred_logistic():
+    base_dir = find_project_root()
+
+    model_path = (
+        base_dir
+        / "data_cache"
+        / "models"
+        / "logistic_model.joblib"
+    )
+
+    X_test_path = (
+        base_dir
+        / "data_cache"
+        / "energy_X_test.csv"
+    )
+
+    y_pred_path = (
+        base_dir
+        / "data_cache"
+        / "models"
+        / "logistic_y_pred.csv"
+    )
+
+    y_pred_prob_path = (
+        base_dir
+        / "data_cache"
+        / "models"
+        / "logistic_y_pred_prob.csv"
+    )
+
+    predict(
+        model_path,
+        X_test_path,
+        y_pred_path,
+        y_pred_prob_path
+    )

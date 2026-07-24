@@ -18,34 +18,54 @@ def _kmeans(df, k):
 
 
 def _plot_centroids(scaled_centers, scaler, colnames, k):
-    """Plot cluster centers in two separate grouped bar plots."""
+    """Plot all cluster centres on scaled and original scales."""
+
+    cluster_names = [f"Cluster {i + 1}" for i in range(k)]
+
+    scaled_df = pd.DataFrame(
+        scaled_centers,
+        columns=colnames,
+    )
+    scaled_df["cluster"] = cluster_names
+
+    scaled_long = scaled_df.melt(
+        id_vars="cluster",
+        var_name="Feature",
+        value_name="Value",
+    )
+
+    fig1 = px.bar(
+        scaled_long,
+        x="Feature",
+        y="Value",
+        color="cluster",
+        barmode="group",
+        title="Cluster Centers by Feature (Scaled Data)",
+    )
+
     original_centers = scaler.inverse_transform(scaled_centers)
 
-    # First half of columns
-    centers_df = pd.DataFrame(original_centers, columns=colnames).iloc[:, [0]]
-    centers_df['cluster'] = [f'Cluster {i}' for i in range(k)]
-    centers_melted = centers_df.melt(id_vars='cluster', var_name='Feature', value_name='Value')
-    fig1 = px.bar(
-        centers_melted,
-        x='Feature',
-        y='Value',
-        color='cluster',
-        barmode='group',
-        title='Cluster Centers by Feature (Original Scale)'
+    original_df = pd.DataFrame(
+        original_centers,
+        columns=colnames,
+    )
+    original_df["cluster"] = cluster_names
+
+    original_long = original_df.melt(
+        id_vars="cluster",
+        var_name="Feature",
+        value_name="Value",
     )
 
-    # Second half of columns
-    centers_df = pd.DataFrame(original_centers, columns=colnames).iloc[:, 1:]
-    centers_df['cluster'] = [f'Cluster {i}' for i in range(k)]
-    centers_melted = centers_df.melt(id_vars='cluster', var_name='Feature', value_name='Value')
     fig2 = px.bar(
-        centers_melted,
-        x='Feature',
-        y='Value',
-        color='cluster',
-        barmode='group',
-        title='Cluster Centers by Feature (Original Scale)'
+        original_long,
+        x="Feature",
+        y="Value",
+        color="cluster",
+        barmode="group",
+        title="Cluster Centers by Feature (Original Scale)",
     )
+
     return fig1, fig2
 
 

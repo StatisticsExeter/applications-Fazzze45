@@ -9,7 +9,7 @@ format:
 
 ## Introduction
 
-This report investigates patterns in road collisions across local authorities in Great Britain using the Stats19 dataset. The analysis applies unsupervised learning methods, including hierarchical and K-Means clustering, to identify areas that share similar collision characteristics based on environmental and road conditions. The objective is to explore how clustering can reveal meaningful regional trends that support road safety planning and policy design.
+This report investigates patterns in road collisions across local authorities in Great Britain using the Stats19 dataset. Unsupervised learning techniques are applied to identify groups of local authorities that share similar collision characteristics based on environmental and road-condition variables. Hierarchical clustering and K-Means clustering are used as the primary methods, while Agglomerative Clustering is implemented as an additional extension to compare clustering solutions. The aim is to explore whether meaningful regional patterns exist and to evaluate the consistency of the clustering methods in supporting road safety planning and policy development.
 
 
 ## The Problem
@@ -59,13 +59,17 @@ The first thing we can do is consider a scatterplot of the data
 
 ![](../../data_cache/vignettes/unsupervised_classification/scatterplot.html){width="100%" height="600px"}
 
-We are going to use the proportion of each subtype of collision that was reported, and rescale the variables.The dataset used in this analysis summarises road collision records across local authorities in Great Britain, derived from the Stats19 police-reported accident data. Each row in the data corresponds to one local authority, while the columns capture different conditions under which collisions occur — such as weather, lighting, and road surface type. These aggregated variables allow us to examine how collision patterns vary geographically and environmentally, rather than focusing on individual incidents.
+The dataset used in this analysis summarises police-reported road collisions across a supplied set of local authorities in Great Britain. The data are derived from the Stats19 road safety records and have been aggregated so that each row represents one local authority rather than one individual collision. The variables describe the number of reported collisions occurring under different conditions, including mini-roundabouts, rainfall, darkness, dry road surfaces, urban areas, slight injuries, and the total number of collisions.
 
-Because local authorities differ greatly in population size, road length, and vehicle activity, the raw counts of collisions cannot be directly compared. To address this, each variable was expressed as a proportion of the total collisions within its authority. This transformation ensures that our analysis highlights relative differences in collision patterns — for example, which areas experience a higher share of night-time accidents — rather than simply identifying the largest regions. In statistical terms, this step standardises the features so that clustering reflects structure in the data rather than magnitude.
+Direct comparison of raw collision counts can be misleading because local authorities may differ in population size, traffic volume, road length, and the number of journeys made within their boundaries. Larger or more heavily travelled authorities would be expected to report more collisions even when their underlying collision patterns are similar to those of smaller areas. To improve comparability, the analysis therefore considers each collision subtype relative to the overall collision profile of the authority. The variables are also rescaled before clustering so that features with larger numerical values do not dominate the distance calculations used by the clustering algorithms.
 
-The scatterplot matrix (Figure 1) provides an initial exploration of these relationships. Each small panel compares two variables, with every point representing a single local authority. The goal of this visualisation is to reveal pairwise patterns or potential correlations before applying formal clustering. Overall, the plot shows only weak linear associations among most variables, suggesting that collision conditions vary independently across authorities. Nonetheless, a few mild relationships can be observed. For instance, authorities with a higher proportion of dry-road collisions also tend to record more total collisions, implying that busy or urbanised areas experience more incidents under normal road conditions. Similarly, n_urban and n_total appear positively related, indicating that regions with extensive urban networks naturally record higher accident volumes.
+The scatterplot matrix provides an initial exploratory view of the relationships between the variables. Each panel compares a pair of collision-related variables, while each point represents one local authority in the supplied dataset. The purpose of the plot is to identify visible patterns, possible associations, or unusual observations before applying the formal clustering methods.
 
-In contrast, variables such as n_raining and n_dark do not show strong pairwise links, implying that weather and lighting effects differ across authorities in ways that simple correlation cannot capture. This lack of clear linear structure reinforces the decision to use unsupervised learning methods, such as clustering, which can uncover multidimensional relationships that are not evident in two-dimensional plots. In essence, the scatterplot motivates the use of clustering by revealing complex variation that likely reflects underlying behavioural, infrastructural, and environmental factors.
+Inspection of the scatterplot does not reveal any clear or strong pairwise relationships between the variables. However, this should be interpreted cautiously because the supplied dataset contains only three local authorities, labelled A, B, and C. With such a small number of observations, it is not possible to draw reliable conclusions about correlation or broader regional trends from visual inspection alone. The points mainly illustrate that the three authorities have different combinations of collision characteristics.
+
+Authority B generally has the lowest values across the plotted variables, while authorities A and C record higher values under several conditions. A and C also appear more similar to one another than either is to B, although they still differ in variables such as rainfall, darkness, dry-road collisions, urban collisions, and slight injuries. These differences suggest that the authorities may form distinct groups when all variables are considered simultaneously.
+
+The limited pairwise information visible in the scatterplot supports the use of unsupervised learning methods. Clustering methods evaluate the observations across several dimensions at once and may therefore identify similarities that are not obvious from individual two-variable panels. In this report, the scatterplot serves mainly as an exploratory and diagnostic step rather than as evidence of statistically robust relationships. Its findings should therefore be interpreted as specific to the small supplied demonstration dataset and not generalised to all local authorities in Great Britain.
 
 
 ## Hierarchical clustering
@@ -75,23 +79,22 @@ The first task is to perform hierarchical clustering.
 
 ![](../../data_cache/vignettes/unsupervised_classification/dendrogram.html){width="100%" height="600px"}
 
-The hierarchical clustering dendrogram provides a visual summary of the similarity structure between authorities. At the lower levels of the tree, authorities that are highly similar are joined together first, while merges occurring higher up represent more distinct groups. By applying a cut-point across the tree, we can divide the dataset into three main clusters, each representing a group of authorities with comparable accident profiles.
+The hierarchical clustering dendrogram provides a visual representation of the similarity between the local authorities based on their collision characteristics. Hierarchical clustering begins by treating each local authority as its own cluster before progressively merging the most similar observations. The vertical height at which two branches merge represents the distance, or dissimilarity, between those observations. Clusters that merge at lower heights are therefore more alike than those that merge at higher levels of the dendrogram.
 
-The structure of the dendrogram indicates that there are clear separations between certain authorities — particularly those with high total collisions and those with relatively few. This suggests differences in the underlying driving environments. For example, authorities that merge at lower levels likely experience similar collision contexts, possibly a higher share of accidents in dry, urban settings. Authorities merging at higher levels may represent unique conditions, such as areas where accidents occur more frequently in the dark or in the rain.
+In the dendrogram shown in Figure 2, two of the local authorities are merged together first at a relatively low linkage distance, indicating that they share similar collision profiles across the variables included in the analysis. The remaining authority joins this group only at a substantially greater distance, suggesting that it differs more noticeably from the other two. This indicates the presence of one authority with a distinct pattern of collision characteristics, while the other two display greater similarity.
 
-Although the dataset is limited in size, the branching pattern still highlights a useful division of authorities based on proportional collision patterns. It gives a quick way to see which areas behave similarly and which stand out as statistically distinct.
+The dendrogram demonstrates that hierarchical clustering is able to separate observations according to their overall collision profiles rather than individual variables. Unlike simple pairwise comparisons, this approach simultaneously considers all of the standardised variables when measuring similarity. Although the supplied dataset contains only three local authorities, the clustering procedure still identifies meaningful differences in their overall patterns.
+
+Because the dataset is small, the resulting tree contains only a few branches, making the clustering structure straightforward to interpret. The analysis should therefore be viewed as a demonstration of the clustering methodology rather than evidence of broader regional trends. Nevertheless, the dendrogram clearly illustrates how hierarchical clustering can identify groups of authorities with similar road collision characteristics and highlight observations that appear comparatively distinct from the rest of the dataset.
 
 
 ![](../../data_cache/vignettes/unsupervised_classification/kscatter.html){width="100%" height="600px"}
 
-To help visualise the results, the cluster assignments from the hierarchical method were plotted using the first two principal components (PC1 and PC2). PCA reduces the dataset’s dimensions while preserving most of its variance, allowing us to see broad relationships between authorities in two-dimensional space.
+To further interpret the hierarchical clustering results, the cluster assignments were projected onto the first two principal components (PC1 and PC2). Principal Component Analysis (PCA) is a dimensionality reduction technique that transforms the original variables into a smaller number of orthogonal components while retaining as much of the variation in the data as possible. Plotting the first two principal components provides a convenient two-dimensional representation of the similarities and differences between local authorities.
 
-Each point represents a local authority, and the colours correspond to cluster membership. The plot shows three distinct clusters with visible separation, confirming that the cut-point chosen for the dendrogram captures meaningful differences in the data.
+Figure 3 shows that each of the three local authorities occupies a distinct position in the PCA space and is assigned to a different cluster. The separation between the points indicates that each authority exhibits a unique combination of collision characteristics after the variables have been standardised. In particular, one authority is located on the left-hand side of the plot, another is positioned in the upper-right region, and the third lies in the lower-right region, demonstrating that the clustering algorithm distinguishes between the observations across both principal components.
 
-Authorities grouped together in the same region of the scatterplot share broadly similar patterns in collision proportions. One cluster appears to represent more urban authorities with a larger share of dry-road or mini-roundabout collisions, while another includes authorities with higher frequencies of collisions in the dark or in rainy conditions. The third cluster contains authorities with relatively balanced or average collision proportions across all conditions.
-
-The PCA scatter helps validate the dendrogram by showing that authorities within the same hierarchical group also remain close in reduced-dimensional space. This reinforces the internal consistency of the clustering and suggests that the main sources of variation in collision data — such as lighting and weather — contribute strongly to how authorities differ from each other.
-
+The PCA scatterplot supports the hierarchical clustering results presented in the dendrogram. Authorities that are assigned to different clusters also appear well separated in the reduced-dimensional space, providing visual evidence that the clustering reflects genuine differences in their collision profiles rather than random variation. However, the interpretation should be made with caution because the demonstration dataset contains only three local authorities. Consequently, the figure is best viewed as illustrating the clustering methodology rather than providing evidence of wider regional trends across Great Britain.
 
 ## kmeans clustering
 
@@ -101,49 +104,101 @@ First, you should look at the cluster centroids:
 
 ![](../../data_cache/vignettes/unsupervised_classification/kcentroids1.html){width="100%" height="600px"}
 
-The first centroid plot displays the **cluster centers based on scaled data**, where all variables were normalized before clustering.  
-This ensures that no feature dominates due to differences in scale.  
+The first centroid plot presents the cluster centres based on scaled data, where all variables were standardised before the k-means clustering algorithm was applied. Standardising the variables ensures that each feature contributes equally to the clustering process, preventing variables with larger numerical values from dominating the distance calculations. As a result, the plot highlights the relative differences between clusters rather than absolute accident counts.
 
-From the plot, **Cluster 1 (blue)** consistently has the lowest standardized values across nearly all features, indicating local authorities with generally lower accident counts or severity.  
-**Cluster 2 (red)** shows moderate to high values, especially around *Feature_1* and *Feature_3*, which could represent authorities with higher frequencies of collisions under specific conditions (e.g., rain or complex junctions).  
-Meanwhile, **Cluster 3 (green)** shows strong positive values for most features, suggesting regions with higher accident activity—potentially urban authorities or areas with more traffic complexity.  
+The results indicate that the three clusters have distinct characteristics. Cluster 1 (blue) consistently shows negative standardised values across all variables, including n_total, n_miniroundabouts, n_raining, n_dark, n_dry, n_urban, and n_slight. This suggests that local authorities assigned to this cluster generally experience lower-than-average accident frequencies under all recorded conditions.
 
-This scaled comparison helps to understand the *relative behavior* of each cluster rather than their absolute accident counts
+Cluster 2 (red) represents an intermediate group. It has positive values for n_total and n_miniroundabouts, while n_raining displays the highest value within this cluster. The remaining variables are closer to the overall average, indicating that these authorities may experience increased collision frequencies under particular conditions, especially during rainfall, rather than consistently high accident levels across all variables.
+
+In contrast, Cluster 3 (green) exhibits strong positive values for most variables, particularly n_dark, n_dry, n_urban, and n_slight. This indicates that these authorities have above-average collision frequencies across a wide range of road and environmental conditions. Such areas are likely to represent locations with greater traffic activity or more complex road networks, resulting in higher collision frequencies.
+
+Overall, the scaled centroid plot demonstrates that the k-means algorithm successfully separates local authorities into three distinct groups with low, moderate, and high accident profiles. These differences provide a useful basis for interpreting the underlying structure of the dataset and comparing accident patterns across authorities.
 
 ![](../../data_cache/vignettes/unsupervised_classification/kcentroids2.html){width="100%" height="600px"}
 
-The second centroid plot presents the **cluster centers on the original data scale**.  
-This representation allows us to see actual value magnitudes for each feature.  
+The second centroid plot presents the cluster centres using the original data scale, allowing the actual magnitudes of each variable to be observed rather than their standardised values. Unlike the scaled centroid plot, this representation makes it easier to compare the approximate values of each feature within the three clusters and understand how the clusters differ in practical terms.
 
-**Cluster 3 (green)** remains dominant across several variables, reinforcing that it represents high-risk or high-frequency collision areas.  
-**Cluster 1 (blue)** again appears consistently lower, highlighting safer or less accident-prone regions.  
-**Cluster 2 (red)** typically falls between the two extremes, which may represent moderately populated authorities with a balanced mix of accident types and severities.  
+The plot demonstrates that Cluster 1 (blue) generally has the lowest values across the variables. In particular, n_total is noticeably lower than the other clusters, while the remaining variables remain close to the minimum observed values. This indicates that local authorities assigned to this cluster tend to experience fewer reported collisions and lower frequencies across different road and environmental conditions. Overall, Cluster 1 appears to represent authorities with relatively low accident activity.
 
-Comparing this with the scaled data confirms that the clustering pattern remains stable regardless of transformation, suggesting a robust K-Means model
+Cluster 2 (red) represents an intermediate group. It records higher values than Cluster 1 for most variables, with n_total and n_raining standing out as the largest values within this cluster. The remaining variables remain at moderate levels, suggesting that these authorities experience increased collision frequencies under certain conditions, particularly during rainfall, while maintaining average levels for the other recorded characteristics.
 
-As before you should plot the cluster membership on a scatterplot of the first two principal components.
+In contrast, Cluster 3 (green) consistently exhibits the highest values for several variables, including n_dark, n_dry, n_urban, and n_slight. These elevated values indicate that authorities belonging to this cluster experience relatively high collision frequencies across multiple road and environmental conditions. The consistently larger centroid values suggest that this group may represent locations with greater traffic exposure or more complex road environments.
+
+Overall, the original-scale centroid plot supports the findings from the scaled analysis by demonstrating that the three clusters remain clearly distinguishable. The similarity between the two representations suggests that the k-means clustering solution is stable and effectively separates local authorities into meaningful accident profiles.
 
 ![](../../data_cache/vignettes/unsupervised_classification/kscatter.html){width="100%" height="600px"}
 
-The PCA scatterplot provides a **visual confirmation of the clustering quality**.  
-Each point represents a local authority projected into a two-dimensional PCA space, with colors corresponding to the clusters identified earlier.  
+The PCA scatterplot provides a visual representation of the K-Means cluster assignments after the original variables were reduced to two principal components, PC1 and PC2. Principal Component Analysis is useful here because it summarises the main variation in the seven collision-related variables within a two-dimensional space. Each point represents one local authority, while the colours indicate the cluster assigned by the K-Means algorithm.
 
-The visible separation among the clusters shows that the K-Means algorithm effectively grouped authorities based on collision characteristics.  
-Clusters are fairly distinct, implying that the main underlying dimensions—such as **lighting conditions, road type, and weather**—drive meaningful differences between regions.  
+The three observations are clearly separated across the plot. One authority appears on the left with a strongly negative PC1 value, another is positioned in the upper-right region with a positive PC2 value, and the third appears in the lower-right region. This separation is consistent with the centroid plots, which showed distinct low, rainfall-related, and generally higher collision profiles. The distance between the points indicates that the authorities have noticeably different combinations of collision characteristics.
 
-This visualization validates the K-Means results and aligns closely with patterns found from the hierarchical clustering, confirming that both methods capture similar regional safety dynamics.
+However, the plot should be interpreted cautiously because the dataset contains only three local authorities and K-Means was fitted using three clusters. As a result, each observation is effectively assigned to its own cluster, so clear visual separation is expected and does not by itself prove strong clustering performance. Nevertheless, the PCA plot confirms that the three authorities occupy different positions in the reduced feature space and provides a useful visual summary of the differences identified by the K-Means analysis.
+
 
 ---
 
 ##  Additional credit
 
-For additional credit you should consider adding a further unsupervised classification method. Alternatively, you could increase the number of variables used in the clustering.
+Agglomerative clustering using complete linkage was implemented as an additional unsupervised learning method. The PCA visualisation of the resulting cluster assignments is shown below.
 
-For the extension component, an additional unsupervised classification method such as DBSCAN could be considered to capture non-linear and density-based relationships in the data. Unlike K-Means, which assumes spherical clusters, DBSCAN can identify irregularly shaped clusters and outliers, making it suitable for accident data where certain local authorities might experience unique collision patterns that do not fit typical trends.
+```{=html}
+<iframe
+  src="../../data_cache/vignettes/unsupervised_classification/agglomerative_scatter.html"
+  width="100%"
+  height="600"
+  style="border:none;">
+</iframe>
+```
 
-Another avenue for extension would involve increasing the number of input variables used in clustering. For instance, incorporating factors such as population density, vehicle volume, or road type diversity could strengthen the interpretation of regional differences. This would allow for a more nuanced understanding of how environmental and infrastructural factors relate to collision severity.
+### Comparison of cluster assignments
 
-Finally, future analysis could compare clustering consistency between hierarchical, K-Means, and density-based methods using silhouette or Davies–Bouldin scores. This would provide a quantitative basis for evaluating how well-defined and distinct the identified clusters are. Together, these enhancements would improve the robustness and interpretability of the overall analysis.
+The cluster assignments produced by K-Means and Agglomerative clustering were compared for each local authority.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(readr)
+library(knitr)
+
+comparison <- read_csv(
+  "../../data_cache/vignettes/unsupervised_classification/cluster_comparison.csv",
+  show_col_types = FALSE
+)
+
+kable(
+  comparison,
+  caption = "Comparison of Cluster Assignments"
+)
+```
+
+### Cluster validation
+
+Silhouette scores were calculated to compare the quality of the two clustering solutions.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+validation <- read_csv(
+  "../../data_cache/vignettes/unsupervised_classification/cluster_validation_scores.csv",
+  show_col_types = FALSE
+)
+
+kable(
+  validation,
+  digits = 3,
+  caption = "Cluster Validation Scores"
+)
+```
+
+Agglomerative clustering was implemented as an additional unsupervised learning method and compared with the existing K-Means solution. The PCA scatterplot shows the three local authorities projected onto the first two principal components, with colours representing the Agglomerative cluster assignments. Authorities A and C were placed in the same cluster, while authority B was assigned to a separate cluster. The points are visibly separated in PCA space, which supports the conclusion that authority B has a different collision profile from the other two authorities.
+
+The comparison table shows that K-Means produced the same broad grouping structure. Although the numerical cluster labels differ between the two methods, these labels are arbitrary and do not imply an ordering. Therefore, the important result is that both algorithms grouped A and C together and treated B as distinct. This agreement suggests that the observed structure is not dependent on one clustering technique alone.
+
+The silhouette scores provide a quantitative comparison of the two solutions. Both K-Means and Agglomerative clustering achieved a score of 0.312, indicating that neither method clearly outperformed the other. The identical scores are consistent with the matching grouping structure. However, a silhouette score of 0.312 suggests only moderate separation between clusters rather than a very strong structure. The result should also be interpreted cautiously because the dataset contains only three local authorities. Overall, the additional method supports the stability of the original K-Means result while also highlighting the limitations caused by the very small sample size.
 
 ## Record of AI use for MTHM503 unsupervised coursework
 
@@ -151,7 +206,7 @@ Instructions: You can use this document to record when, how and why you used Gen
 
 | **Date**       | **AI tool used** | **Purpose**                                | **Prompt**                                 | **Hyperlink to output (where possible)** | **Section of work used for** |
 |----------------|------------------|--------------------------------------------|--------------------------------------------|------------------------------------------|-------------------------------|
-|12/12/2025|ChatGPT (CPT-5) | To help explain the data and hierarchical clustering sections clearly and improve structure| To assist in writing a polished discussion for K-Means clustering and additional credit’ |N/A| Data interpretation, Hierarchical Clustering, K-Means Clustering, Additional Credit                 |
+|24/07/2026|ChatGPT (CPT-5) |To help interpret clustering results, debug plotting and coding issues, and improve the clarity and structure of the written discussion.| Asked ChatGPT to explain K-Means, PCA and Agglomerative Clustering results, help identify coding and plotting errors, compare cluster assignments and silhouette scores, and refine the written interpretation into clearer academic language.|N/A| Data interpretation, K-Means clustering, Agglomerative Clustering, PCA visualisation, report writing|
 |                |                  |                                            |                                            |                                          |                               |
 |                |                  |                                            |                                            |                                          |                               |
 |                |                  |                                            |                                            |                                          |                               |

@@ -2,7 +2,12 @@ from pathlib import Path
 from course.unsupervised_classification.eda import plot_scatter
 from course.unsupervised_classification.tree import hierarchical_groups, hcluster_analysis
 from course.unsupervised_classification.kmeans import kmeans
-
+from course.unsupervised_classification.agglomerative import (
+    agglomerative_clustering,
+)
+from course.unsupervised_classification.cluster_comparison import (
+    compare_clustering_methods,
+)
 
 def task_check_cache_data():
     def check_cache_data():
@@ -69,4 +74,37 @@ def task_kmeans():
         'targets': ['data_cache/vignettes/supervised_classification/kscatter.html',
                     'data_cache/vignettes/supervised_classification/kcentroids1.html'
                     'data_cache/vignettes/supervised_classification/kcentroids2.html']
+    }
+
+
+def task_agglomerative():
+    return {
+        "actions": [lambda: agglomerative_clustering(3)],
+        "file_dep": [
+            "data_cache/la_collision.csv",
+            "course/unsupervised_classification/agglomerative.py",
+        ],
+        "targets": [
+            "data_cache/vignettes/unsupervised_classification/"
+            "agglomerative_scatter.html",
+            "data_cache/vignettes/unsupervised_classification/"
+            "agglomerative_clusters.csv",
+        ],
+    }
+
+
+def task_cluster_comparison():
+    return {
+        "actions": [compare_clustering_methods],
+        "file_dep": [
+            "data_cache/la_collision.csv",
+            "course/unsupervised_classification/"
+            "cluster_comparison.py",
+        ],
+        "targets": [
+            "data_cache/vignettes/unsupervised_classification/"
+            "cluster_comparison.csv",
+            "data_cache/vignettes/unsupervised_classification/"
+            "cluster_validation_scores.csv",
+        ],
     }
